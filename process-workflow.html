@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Process Workflows for Eastern Cape</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #2c3e50;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+            padding: 20px 0;
+            position: relative;
+        }
+        
+        h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+        
+        .info-btn {
+            background-color: transparent;
+            color: #ff6b6b;
+            border: 1px solid #ff6b6b;
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .info-btn:hover {
+            background-color: rgba(255, 107, 107, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
+        }
+        
+        .workflow-container {
+            width: 100%;
+            max-width: 1000px;
+            position: relative;
+            margin: 30px 0;
+        }
+        
+        .workflow-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+            position: relative;
+        }
+        
+        .workflow-step.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .step-number {
+            background-color: #fff;
+            color: #2c3e50;
+            width: 150px; /* Increased from 120px */
+            height: 150px; /* Increased from 120px */
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 3.5rem; /* Increased from 3rem */
+            font-weight: bold;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
+            transition: all 0.3s ease;
+            padding: 10px; /* Added padding */
+        }
+        
+        .step-number:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .step-title {
+            font-size: 1rem; /* Increased from 0.9rem */
+            font-weight: bold;
+            text-align: center;
+            max-width: 130px; /* Increased from 120px */
+            line-height: 1.3; /* Increased from 1.2 */
+            margin-top: 8px; /* Increased from 5px */
+            word-break: break-word; /* Ensure long words break properly */
+        }
+        
+        .arrow {
+            color: #ff6b6b;
+            font-size: 2.5rem; /* Increased from 2rem */
+            margin: 0 20px; /* Increased from 15px */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .description {
+            background-color: #ff6b6b;
+            color: white;
+            padding: 25px 35px; /* Increased padding */
+            border-radius: 30px;
+            flex-grow: 1;
+            font-size: 1.2rem; /* Increased from 1.1rem */
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            max-width: 70%;
+            line-height: 1.5; /* Added for better text spacing */
+        }
+        
+        .description:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.3);
+        }
+        
+        .description.empty {
+            background-color: transparent;
+            border: 2px dashed rgba(255, 107, 107, 0.5);
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .detail-panel {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background-color: #fff;
+            color: #333;
+            width: 80%;
+            max-width: 600px;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .detail-panel.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+        
+        .detail-panel h2 {
+            font-size: 1.8rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ff6b6b;
+            padding-bottom: 10px;
+        }
+        
+        .detail-panel p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .detail-panel ul {
+            margin-left: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .detail-panel li {
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #ff6b6b;
+            transition: all 0.3s ease;
+        }
+        
+        .close-btn:hover {
+            transform: rotate(90deg);
+            color: #e74c3c;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .connector {
+            position: absolute;
+            left: 75px; /* Adjusted for larger circle */
+            top: 150px; /* Adjusted for larger circle */
+            width: 2px;
+            height: 0;
+            background-color: rgba(255, 255, 255, 0.3);
+            transition: height 1s ease;
+        }
+        
+        @media (max-width: 768px) {
+            .workflow-step {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .step-number {
+                width: 100px; /* Adjusted from 80px */
+                height: 100px; /* Adjusted from 80px */
+                font-size: 2.5rem; /* Adjusted from 2rem */
+                margin-bottom: 15px;
+            }
+            
+            .step-title {
+                font-size: 0.9rem;
+                max-width: 100px;
+            }
+            
+            .arrow {
+                transform: rotate(90deg);
+                margin: 15px 0;
+                font-size: 2rem; /* Adjusted for mobile */
+            }
+            
+            .description {
+                width: 100%;
+                max-width: 100%;
+                font-size: 1rem; /* Adjusted for mobile */
+                padding: 20px;
+            }
+            
+            .connector {
+                left: 50px; /* Adjusted for mobile */
+            }
+        }
+        
+        /* Animation classes */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .highlight {
+            box-shadow: 0 0 0 3px #fff, 0 0 0 6px #ff6b6b;
+        }
+        
+        .info-tooltip {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            bottom: -70px;
+            background-color: #fff;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            max-width: 300px;
+            text-align: center;
+        }
+        
+        .info-tooltip.active {
+            opacity: 1;
+            visibility: visible;
+            bottom: -60px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PROCESS WORKFLOWS FOR EASTERN CAPE</h1>
+        <button class="info-btn">+ INFO</button>
+        <div class="info-tooltip">This interactive workflow shows the key educational processes in Eastern Cape. Click on any step to learn more!</div>
+    </div>
+    
+    <div class="workflow-container">
+        <div class="connector"></div>
+        
+        <div class="workflow-step" data-step="1">
+            <div class="step-number">
+                1
+                <div class="step-title">STUDENT ENROLLMENT</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="description">ENABLES STUDENTS TO ENROLL TO SCHOOL</div>
+        </div>
+        
+        <div class="workflow-step" data-step="2">
+            <div class="step-number">
+                2
+                <div class="step-title">TEACHER SUPPORT DEVELOPMENT</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="description">ALLOWS PEER MONITORING PROGRAMS FOR TEACHERS</div>
+        </div>
+        
+        <div class="workflow-step" data-step="3">
+            <div class="step-number">
+                3
+                <div class="step-title">LEARNER SUPPORT</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="description empty">PROVIDES ACADEMIC AND EMOTIONAL SUPPORT FOR LEARNERS</div>
+        </div>
+        
+        <div class="workflow-step" data-step="4">
+            <div class="step-number">
+                4
+                <div class="step-title">SCHOOL ANNOUNCEMENT</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="description empty">FACILITATES COMMUNICATION ACROSS THE SCHOOL COMMUNITY</div>
+        </div>
+        
+        <div class="workflow-step" data-step="5">
+            <div class="step-number">
+                5
+                <div class="step-title">LEARNER FEEDBACKS</div>
+            </div>
+            <div class="arrow">→</div>
+            <div class="description empty">COLLECTS AND PROCESSES FEEDBACK FROM STUDENTS</div>
+        </div>
+    </div>
+    
+    <div class="overlay"></div>
+    
+    <div class="detail-panel" data-step="1">
+        <button class="close-btn">×</button>
+        <h2>STUDENT ENROLLMENT</h2>
+        <p>The enrollment process enables students to officially register for education in Eastern Cape schools. This essential first step connects students to the educational system.</p>
+        <h3>Key Features:</h3>
+        <ul>
+            <li>Online and in-person registration options</li>
+            <li>Document verification system</li>
+            <li>Automatic placement recommendations</li>
+            <li>Parent/guardian portal access</li>
+            <li>Integration with student information systems</li>
+        </ul>
+        <p>The enrollment system serves as the foundation for all other educational processes, ensuring accurate student records and appropriate class placement.</p>
+    </div>
+    
+    <div class="detail-panel" data-step="2">
+        <button class="close-btn">×</button>
+        <h2>TEACHER SUPPORT DEVELOPMENT</h2>
+        <p>This program facilitates professional growth among educators through collaborative learning and mentorship opportunities.</p>
+        <h3>Program Components:</h3>
+        <ul>
+            <li>Peer observation and feedback sessions</li>
+            <li>Collaborative lesson planning workshops</li>
+            <li>Professional learning communities</li>
+            <li>Best practice sharing forums</li>
+            <li>Data-driven instructional improvement</li>
+        </ul>
+        <p>Teacher support development is crucial for maintaining high-quality education and ensuring continuous professional growth among Eastern Cape educators.</p>
+    </div>
+    
+    <div class="detail-panel" data-step="3">
+        <button class="close-btn">×</button>
+        <h2>LEARNER SUPPORT</h2>
+        <p>A comprehensive framework designed to address the academic, social, and emotional needs of students in Eastern Cape schools.</p>
+        <h3>Support Services:</h3>
+        <ul>
+            <li>Remedial instruction and academic interventions</li>
+            <li>Counseling and psychological support</li>
+            <li>Special needs accommodation</li>
+            <li>After-school tutoring programs</li>
+            <li>Behavior support and positive discipline</li>
+        </ul>
+        <p>Effective learner support systems help ensure that all students have the opportunity to succeed regardless of their individual challenges.</p>
+    </div>
+    
+    <div class="detail-panel" data-step="4">
+        <button class="close-btn">×</button>
+        <h2>SCHOOL ANNOUNCEMENT</h2>
+        <p>A multi-channel communication system that keeps all stakeholders informed about important information, events, and updates.</p>
+        <h3>Communication Channels:</h3>
+        <ul>
+            <li>Digital notification system</li>
+            <li>SMS alerts for urgent communications</li>
+            <li>School website updates</li>
+            <li>Parent-teacher communication portal</li>
+            <li>Community bulletin boards and newsletters</li>
+        </ul>
+        <p>Effective communication is essential for maintaining strong relationships between schools, families, and the broader community.</p>
+    </div>
+    
+    <div class="detail-panel" data-step="5">
+        <button class="close-btn">×</button>
+        <h2>LEARNER FEEDBACKS</h2>
+        <p>A structured system for collecting, analyzing, and responding to student feedback about their educational experience.</p>
+        <h3>Feedback Mechanisms:</h3>
+        <ul>
+            <li>Regular student surveys and questionnaires</li>
+            <li>Focus group discussions</li>
+            <li>Anonymous suggestion systems</li>
+            <li>Student representative councils</li>
+            <li>Data analysis and response protocols</li>
+        </ul>
+        <p>Student feedback is invaluable for continuous improvement of teaching methods, curriculum design, and school culture.</p>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.workflow-step');
+            const infoBtn = document.querySelector('.info-btn');
+            const infoTooltip = document.querySelector('.info-tooltip');
+            const overlay = document.querySelector('.overlay');
+            const detailPanels = document.querySelectorAll('.detail-panel');
+            const closeButtons = document.querySelectorAll('.close-btn');
+            const connector = document.querySelector('.connector');
+            
+            // Animate steps sequentially
+            function animateSteps() {
+                steps.forEach((step, index) => {
+                    setTimeout(() => {
+                        step.classList.add('active');
+                        if (index < steps.length - 1) {
+                            if (index === 0) {
+                                connector.style.height = `${(steps.length - 1) * 190}px`; /* Adjusted for larger circles */
+                            }
+                        }
+                    }, 300 * (index + 1));
+                });
+            }
+            
+            // Initialize animation
+            setTimeout(animateSteps, 500);
+            
+            // Handle info button
+            infoBtn.addEventListener('mouseenter', () => {
+                infoTooltip.classList.add('active');
+            });
+            
+            infoBtn.addEventListener('mouseleave', () => {
+                infoTooltip.classList.remove('active');
+            });
+            
+            // Handle step clicks
+            steps.forEach(step => {
+                step.addEventListener('click', () => {
+                    const stepNumber = step.getAttribute('data-step');
+                    const detailPanel = document.querySelector(`.detail-panel[data-step="${stepNumber}"]`);
+                    
+                    if (detailPanel) {
+                        overlay.classList.add('active');
+                        detailPanel.classList.add('active');
+                        
+                        // Add highlighting effect
+                        const stepNumberElement = step.querySelector('.step-number');
+                        stepNumberElement.classList.add('highlight');
+                        
+                        // Remove highlight when panel closes
+                        const removeHighlight = () => {
+                            stepNumberElement.classList.remove('highlight');
+                        };
+                        
+                        overlay.addEventListener('click', removeHighlight, { once: true });
+                        detailPanel.querySelector('.close-btn').addEventListener('click', removeHighlight, { once: true });
+                    }
+                });
+            });
+            
+            // Close detail panels
+            closeButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    overlay.classList.remove('active');
+                    detailPanels.forEach(panel => {
+                        panel.classList.remove('active');
+                    });
+                });
+            });
+            
+            overlay.addEventListener('click', () => {
+                overlay.classList.remove('active');
+                detailPanels.forEach(panel => {
+                    panel.classList.remove('active');
+                });
+            });
+            
+            // Add hover effects
+            steps.forEach(step => {
+                const stepNumber = step.querySelector('.step-number');
+                const description = step.querySelector('.description');
+                
+                stepNumber.addEventListener('mouseenter', () => {
+                    stepNumber.classList.add('pulse');
+                });
+                
+                stepNumber.addEventListener('mouseleave', () => {
+                    stepNumber.classList.remove('pulse');
+                });
+                
+                description.addEventListener('mouseenter', () => {
+                    if (!description.classList.contains('empty')) {
+                        description.style.transform = 'translateY(-5px)';
+                    }
+                });
+                
+                description.addEventListener('mouseleave', () => {
+                    if (!description.classList.contains('empty')) {
+                        description.style.transform = 'translateY(0)';
+                    }
+                });
+            });
+            
+            // Add floating animation to some elements for visual interest
+            function addFloatingAnimation() {
+                const arrows = document.querySelectorAll('.arrow');
+                arrows.forEach((arrow, index) => {
+                    arrow.style.animation = `pulse 3s infinite ${index * 0.5}s`;
+                });
+            }
+            
+            setTimeout(addFloatingAnimation, 2000);
+        });
+    </script>
+</body>
+</html>

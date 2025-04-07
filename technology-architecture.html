@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technology Infrastructure Architecture</title>
+    <style>
+        :root {
+            --online: #4CAF50;
+            --offline: #FF9800;
+            --cloud: #2196F3;
+            --user: #9C27B0;
+            --network: #607D8B;
+            --dark: #263238;
+            --light: #ECEFF1;
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            padding: 20px;
+            background-image: linear-gradient(rgba(245, 247, 250, 0.9), rgba(245, 247, 250, 0.9)), 
+                              url('data:image/svg+xml;utf8,<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg"><path d="M0 0 L100 0 L100 100 L0 100 Z" fill="none" stroke="%23e0e0e0" stroke-width="0.5"/></svg>');
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border: 1px solid #e0e0e0;
+        }
+
+        h1 {
+            color: var(--dark);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .architecture {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid #e0e0e0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .architecture::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--user), var(--offline), var(--network), var(--online), var(--cloud));
+        }
+
+        .layers {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative;
+        }
+
+        .layer {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .layer::before {
+            content: "";
+            position: absolute;
+            left: 20px;
+            top: 40px;
+            bottom: -30px;
+            width: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .layer:last-child::before {
+            display: none;
+        }
+
+        .layer-title {
+            font-weight: 600;
+            color: var(--dark);
+            margin-bottom: 15px;
+            padding-left: 30px;
+            position: relative;
+            font-size: 1.2rem;
+        }
+
+        .layer-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--dark);
+            border: 4px solid white;
+            box-shadow: 0 0 0 2px var(--dark);
+            z-index: 2;
+        }
+
+        .components {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding-left: 30px;
+        }
+
+        .component {
+            background: white;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px;
+            width: 180px;
+            cursor: pointer;
+            transition: var(--transition);
+            border-left: 4px solid #ddd;
+            position: relative;
+            z-index: 2;
+            border: 1px solid #e0e0e0;
+        }
+
+        .component:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .component::after {
+            content: "";
+            position: absolute;
+            left: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 2px;
+            background: #e0e0e0;
+            z-index: 1;
+        }
+
+        .component.online {
+            border-left-color: var(--online);
+        }
+
+        .component.offline {
+            border-left-color: var(--offline);
+        }
+
+        .component.cloud {
+            border-left-color: var(--cloud);
+        }
+
+        .component.user {
+            border-left-color: var(--user);
+        }
+
+        .component.network {
+            border-left-color: var(--network);
+        }
+
+        .component h3 {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 5px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .component h3 i {
+            font-size: 1.2rem;
+        }
+
+        .component p {
+            font-size: 0.85rem;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+            z-index: 100;
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            border-radius: 8px 0 0 8px;
+            background: var(--online);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .category-tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: white;
+        }
+
+        .online-tag {
+            background: var(--online);
+        }
+
+        .offline-tag {
+            background: var(--offline);
+        }
+
+        .cloud-tag {
+            background: var(--cloud);
+        }
+
+        .user-tag {
+            background: var(--user);
+        }
+
+        .network-tag {
+            background: var(--network);
+        }
+
+        .modal-body h3 {
+            color: var(--dark);
+            margin: 20px 0 10px;
+            font-size: 1.2rem;
+        }
+
+        .modal-body ul {
+            padding-left: 20px;
+            margin-bottom: 15px;
+        }
+
+        .modal-body li {
+            margin-bottom: 8px;
+            line-height: 1.5;
+        }
+
+        @media (max-width: 768px) {
+            .components {
+                justify-content: center;
+            }
+
+            .component {
+                width: 100%;
+                max-width: 220px;
+            }
+
+            .layer::before {
+                display: none;
+            }
+
+            .component::after {
+                display: none;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Technology Infrastructure Architecture</h1>
+            <p>Hybrid online/offline system</p>
+        </header>
+        
+        <div class="architecture">
+            <div class="layers">
+                <!-- End Users -->
+                <div class="layer">
+                    <h2 class="layer-title">End Users</h2>
+                    <div class="components">
+                        <div class="component user" data-component="students">
+                            <h3><i class="fas fa-user-graduate"></i> Students</h3>
+                            <p>Primary learners accessing content</p>
+                        </div>
+                        <div class="component user" data-component="teachers">
+                            <h3><i class="fas fa-chalkboard-teacher"></i> Teachers</h3>
+                            <p>Content creators and instructors</p>
+                        </div>
+                        <div class="component user" data-component="admins">
+                            <h3><i class="fas fa-user-shield"></i> Administrators</h3>
+                            <p>System configuration</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Client Applications -->
+                <div class="layer">
+                    <h2 class="layer-title">Client Applications</h2>
+                    <div class="components">
+                        <div class="component offline" data-component="mobile">
+                            <h3><i class="fas fa-mobile-alt"></i> Mobile App</h3>
+                            <p>iOS & Android applications</p>
+                        </div>
+                        <div class="component offline" data-component="desktop">
+                            <h3><i class="fas fa-laptop"></i> Desktop App</h3>
+                            <p>Windows, macOS clients</p>
+                        </div>
+                        <div class="component offline" data-component="pwa">
+                            <h3><i class="fas fa-window-restore"></i> Web App</h3>
+                            <p>Browser-based access</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Offline Components -->
+                <div class="layer">
+                    <h2 class="layer-title">Offline Components</h2>
+                    <div class="components">
+                        <div class="component offline" data-component="storage">
+                            <h3><i class="fas fa-database"></i> Local Storage</h3>
+                            <p>Offline data persistence</p>
+                        </div>
+                        <div class="component offline" data-component="sync">
+                            <h3><i class="fas fa-sync-alt"></i> Sync Engine</h3>
+                            <p>Background synchronization</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Network -->
+                <div class="layer">
+                    <h2 class="layer-title">Network</h2>
+                    <div class="components">
+                        <div class="component network" data-component="wifi">
+                            <h3><i class="fas fa-wifi"></i> WiFi</h3>
+                            <p>Local network connectivity</p>
+                        </div>
+                        <div class="component network" data-component="cellular">
+                            <h3><i class="fas fa-signal"></i> Cellular</h3>
+                            <p>Mobile data access</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Online Components -->
+                <div class="layer">
+                    <h2 class="layer-title">Online Components</h2>
+                    <div class="components">
+                        <div class="component online" data-component="loadbalancer">
+                            <h3><i class="fas fa-balance-scale"></i> Load Balancer</h3>
+                            <p>Traffic distribution</p>
+                        </div>
+                        <div class="component online" data-component="cdn">
+                            <h3><i class="fas fa-globe"></i> CDN</h3>
+                            <p>Content delivery network</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Cloud -->
+                <div class="layer">
+                    <h2 class="layer-title">Cloud Infrastructure</h2>
+                    <div class="components">
+                        <div class="component cloud" data-component="aws">
+                            <h3><i class="fab fa-aws"></i> AWS</h3>
+                            <p>Amazon Web Services</p>
+                        </div>
+                        <div class="component cloud" data-component="azure">
+                            <h3><i class="fab fa-microsoft"></i> Azure</h3>
+                            <p>Microsoft Cloud</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Services -->
+                <div class="layer">
+                    <h2 class="layer-title">Services</h2>
+                    <div class="components">
+                        <div class="component online" data-component="auth">
+                            <h3><i class="fas fa-user-lock"></i> Authentication</h3>
+                            <p>User identity management</p>
+                        </div>
+                        <div class="component online" data-component="database">
+                            <h3><i class="fas fa-database"></i> Database</h3>
+                            <p>Data storage and retrieval</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="modal-title">
+                    <span id="modal-icon"></span>
+                    <span id="modal-name">Component</span>
+                    <span class="category-tag" id="modal-category">Online</span>
+                </h2>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-body">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Component data
+        const components = {
+            'students': {
+                title: 'Students',
+                icon: 'fas fa-user-graduate',
+                category: 'user',
+                description: 'Primary users of the educational platform who access learning materials and submit assignments.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Access course materials online/offline</li>
+                        <li>Submit assignments and assessments</li>
+                        <li>Track learning progress and achievements</li>
+                        <li>Participate in discussions and forums</li>
+                    </ul>
+                    <h3>Access Patterns</h3>
+                    <ul>
+                        <li>Primarily use mobile devices</li>
+                        <li>Frequent switching between online/offline</li>
+                        <li>Variable network conditions</li>
+                    </ul>
+                `
+            },
+            'teachers': {
+                title: 'Teachers',
+                icon: 'fas fa-chalkboard-teacher',
+                category: 'user',
+                description: 'Educators who create content, grade assignments, and monitor student progress.',
+                details: `
+                    <h3>Key Responsibilities</h3>
+                    <ul>
+                        <li>Create and organize course materials</li>
+                        <li>Grade student submissions</li>
+                        <li>Provide feedback and assessments</li>
+                        <li>Monitor class performance</li>
+                    </ul>
+                    <h3>Usage Patterns</h3>
+                    <ul>
+                        <li>Primarily use desktop devices</li>
+                        <li>Require robust content creation tools</li>
+                        <li>Need access to student data offline</li>
+                    </ul>
+                `
+            },
+            'admins': {
+                title: 'Administrators',
+                icon: 'fas fa-user-shield',
+                category: 'user',
+                description: 'System administrators who manage platform configuration and user access.',
+                details: `
+                    <h3>Key Responsibilities</h3>
+                    <ul>
+                        <li>User management and permissions</li>
+                        <li>System configuration</li>
+                        <li>Reporting and analytics</li>
+                        <li>Content moderation</li>
+                    </ul>
+                    <h3>Access Requirements</h3>
+                    <ul>
+                        <li>Always requires online connectivity</li>
+                        <li>Advanced admin interfaces</li>
+                        <li>Audit logging capabilities</li>
+                    </ul>
+                `
+            },
+            'mobile': {
+                title: 'Mobile Application',
+                icon: 'fas fa-mobile-alt',
+                category: 'offline',
+                description: 'Native mobile applications for iOS and Android with full offline support.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>React Native cross-platform framework</li>
+                        <li>Offline-first architecture</li>
+                        <li>Background synchronization</li>
+                        <li>Push notifications</li>
+                    </ul>
+                    <h3>Technical Details</h3>
+                    <ul>
+                        <li>SQLite for local data storage</li>
+                        <li>File system access for media</li>
+                        <li>Optimized for low-bandwidth</li>
+                    </ul>
+                `
+            },
+            'desktop': {
+                title: 'Desktop Application',
+                icon: 'fas fa-laptop',
+                category: 'offline',
+                description: 'Native desktop clients for Windows and macOS with full feature set.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Electron-based cross-platform app</li>
+                        <li>System tray integration</li>
+                        <li>Native filesystem access</li>
+                        <li>Automatic updates</li>
+                    </ul>
+                    <h3>Technical Details</h3>
+                    <ul>
+                        <li>Full relational database support</li>
+                        <li>Hardware accelerated rendering</li>
+                        <li>Background services</li>
+                    </ul>
+                `
+            },
+            'pwa': {
+                title: 'Progressive Web App',
+                icon: 'fas fa-window-restore',
+                category: 'offline',
+                description: 'Browser-based application with native-like features and offline support.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Installable on devices</li>
+                        <li>Responsive design</li>
+                        <li>Service worker caching</li>
+                        <li>Push notifications</li>
+                    </ul>
+                    <h3>Technical Details</h3>
+                    <ul>
+                        <li>Cache-first strategy for assets</li>
+                        <li>IndexedDB for structured data</li>
+                        <li>Background sync API</li>
+                    </ul>
+                `
+            },
+            'storage': {
+                title: 'Local Storage',
+                icon: 'fas fa-database',
+                category: 'offline',
+                description: 'Client-side data persistence mechanisms for offline access.',
+                details: `
+                    <h3>Storage Options</h3>
+                    <ul>
+                        <li>IndexedDB for structured data</li>
+                        <li>SQLite in native apps</li>
+                        <li>File system for media</li>
+                        <li>LocalStorage for simple data</li>
+                    </ul>
+                    <h3>Data Management</h3>
+                    <ul>
+                        <li>Automatic cache invalidation</li>
+                        <li>Encryption for sensitive data</li>
+                        <li>Storage quota management</li>
+                    </ul>
+                `
+            },
+            'sync': {
+                title: 'Sync Engine',
+                icon: 'fas fa-sync-alt',
+                category: 'offline',
+                description: 'Background synchronization between client and server data.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Conflict resolution</li>
+                        <li>Change tracking</li>
+                        <li>Differential sync</li>
+                        <li>Bandwidth optimization</li>
+                    </ul>
+                    <h3>Technical Details</h3>
+                    <ul>
+                        <li>Operational transform algorithm</li>
+                        <li>Compressed data transfer</li>
+                        <li>Automatic retry logic</li>
+                    </ul>
+                `
+            },
+            'wifi': {
+                title: 'WiFi Network',
+                icon: 'fas fa-wifi',
+                category: 'network',
+                description: 'Local wireless network connectivity with intelligent caching.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Bandwidth detection</li>
+                        <li>Local network caching</li>
+                        <li>Seamless handoff</li>
+                        <li>Quality of service</li>
+                    </ul>
+                    <h3>Optimizations</h3>
+                    <ul>
+                        <li>Prefetching on high-speed</li>
+                        <li>Media quality adaptation</li>
+                        <li>Differential updates</li>
+                    </ul>
+                `
+            },
+            'cellular': {
+                title: 'Cellular Network',
+                icon: 'fas fa-signal',
+                category: 'network',
+                description: 'Mobile data connectivity with optimized synchronization.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Data saver mode</li>
+                        <li>Background sync control</li>
+                        <li>Connection quality detection</li>
+                        <li>Battery optimization</li>
+                    </ul>
+                    <h3>Technical Details</h3>
+                    <ul>
+                        <li>Minimized polling</li>
+                        <li>Compressed transfers</li>
+                        <li>Adaptive retry logic</li>
+                    </ul>
+                `
+            },
+            'loadbalancer': {
+                title: 'Load Balancer',
+                icon: 'fas fa-balance-scale',
+                category: 'online',
+                description: 'Distributes incoming traffic across multiple servers.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Round-robin distribution</li>
+                        <li>Health checks</li>
+                        <li>SSL termination</li>
+                        <li>DDoS protection</li>
+                    </ul>
+                    <h3>Implementation</h3>
+                    <ul>
+                        <li>NGINX-based</li>
+                        <li>Auto-scaling integration</li>
+                        <li>Geo-based routing</li>
+                    </ul>
+                `
+            },
+            'cdn': {
+                title: 'Content Delivery Network',
+                icon: 'fas fa-globe',
+                category: 'online',
+                description: 'Global content distribution with edge caching.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>Edge caching</li>
+                        <li>Image optimization</li>
+                        <li>DDoS mitigation</li>
+                        <li>Video streaming</li>
+                    </ul>
+                    <h3>Benefits</h3>
+                    <ul>
+                        <li>Reduced server load</li>
+                        <li>Faster content delivery</li>
+                        <li>Improved reliability</li>
+                    </ul>
+                `
+            },
+            'aws': {
+                title: 'Amazon Web Services',
+                icon: 'fab fa-aws',
+                category: 'cloud',
+                description: 'Primary cloud infrastructure provider.',
+                details: `
+                    <h3>Key Services</h3>
+                    <ul>
+                        <li>EC2: Virtual servers</li>
+                        <li>S3: Object storage</li>
+                        <li>RDS: Managed databases</li>
+                        <li>Lambda: Serverless</li>
+                    </ul>
+                    <h3>Architecture</h3>
+                    <ul>
+                        <li>Multi-AZ deployment</li>
+                        <li>Auto-scaling groups</li>
+                        <li>VPC networking</li>
+                    </ul>
+                `
+            },
+            'azure': {
+                title: 'Microsoft Azure',
+                icon: 'fab fa-microsoft',
+                category: 'cloud',
+                description: 'Secondary cloud infrastructure provider.',
+                details: `
+                    <h3>Key Services</h3>
+                    <ul>
+                        <li>Virtual Machines</li>
+                        <li>Blob Storage</li>
+                        <li>SQL Database</li>
+                        <li>Functions</li>
+                    </ul>
+                    <h3>Integration</h3>
+                    <ul>
+                        <li>Active Directory</li>
+                        <li>Hybrid cloud</li>
+                        <li>DevOps pipelines</li>
+                    </ul>
+                `
+            },
+            'auth': {
+                title: 'Authentication Service',
+                icon: 'fas fa-user-lock',
+                category: 'online',
+                description: 'Secure user identity and access management.',
+                details: `
+                    <h3>Key Features</h3>
+                    <ul>
+                        <li>OAuth 2.0/OpenID Connect</li>
+                        <li>Multi-factor authentication</li>
+                        <li>JWT tokens</li>
+                        <li>Role-based access</li>
+                    </ul>
+                    <h3>Security</h3>
+                    <ul>
+                        <li>Password hashing</li>
+                        <li>Brute force protection</li>
+                        <li>Session management</li>
+                    </ul>
+                `
+            },
+            'database': {
+                title: 'Database Service',
+                icon: 'fas fa-database',
+                category: 'online',
+                description: 'Central data persistence and retrieval system.',
+                details: `
+                    <h3>Database Types</h3>
+                    <ul>
+                        <li>PostgreSQL: Relational</li>
+                        <li>MongoDB: Document</li>
+                        <li>Redis: Caching</li>
+                        <li>Elasticsearch: Search</li>
+                    </ul>
+                    <h3>Architecture</h3>
+                    <ul>
+                        <li>Primary-replica setup</li>
+                        <li>Connection pooling</li>
+                        <li>Regular backups</li>
+                    </ul>
+                `
+            }
+        };
+
+        // DOM elements
+        const modal = document.getElementById('modal');
+        const modalName = document.getElementById('modal-name');
+        const modalIcon = document.getElementById('modal-icon');
+        const modalCategory = document.getElementById('modal-category');
+        const modalBody = document.getElementById('modal-body');
+        const closeModal = document.getElementById('close-modal');
+        
+        // Add click handlers to all components
+        document.querySelectorAll('.component').forEach(component => {
+            component.addEventListener('click', function() {
+                const componentId = this.getAttribute('data-component');
+                const componentData = components[componentId];
+                
+                // Update modal content
+                modalName.textContent = componentData.title;
+                modalIcon.className = componentData.icon;
+                modalCategory.className = `category-tag ${componentData.category}-tag`;
+                modalCategory.textContent = componentData.category.charAt(0).toUpperCase() + componentData.category.slice(1);
+                
+                modalBody.innerHTML = `
+                    <p><strong>${componentData.description}</strong></p>
+                    ${componentData.details}
+                `;
+                
+                // Update modal accent color
+                document.querySelector('.modal-content::before')?.style.setProperty('background', `var(--${componentData.category})`);
+                
+                // Show modal
+                modal.classList.add('active');
+            });
+        });
+        
+        // Close modal handler
+        closeModal.addEventListener('click', () => {
+            modal.classList.remove('active');
+        });
+        
+        // Close modal when clicking outside
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
